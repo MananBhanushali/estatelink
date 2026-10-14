@@ -16,6 +16,7 @@ TRUNCATE TABLE Leases;
 TRUNCATE TABLE Property_Tenant_Type;
 TRUNCATE TABLE Properties;
 TRUNCATE TABLE Commission;
+TRUNCATE TABLE Users;
 TRUNCATE TABLE Clients;
 TRUNCATE TABLE Brokers;
 
@@ -29,6 +30,23 @@ INSERT INTO Brokers (broker_id, name, email, phone, join_date) VALUES
 (2, 'Priya Patel', 'priya.patel@estatelink.com', '+91 98202 23456', '2023-03-20'),
 (3, 'Amit Verma', 'amit.verma@estatelink.com', '+91 98203 34567', '2023-06-10'),
 (4, 'Sneha Iyer', 'sneha.iyer@estatelink.com', '+91 98204 45678', '2023-09-01');
+
+-- ============================================================================
+-- Seed: Users (Auth credentials — all passwords: 'password123')
+-- bcrypt hash of 'password123': $2b$10$FVtUZBLpvIb5t6Np5QUh5OsHrCDliPo1S4Zp4sLc3564BIEipCc.S
+-- ============================================================================
+INSERT INTO Users (user_id, email, password_hash, role, ref_id) VALUES
+(1, 'admin@estatelink.com', '$2b$10$FVtUZBLpvIb5t6Np5QUh5OsHrCDliPo1S4Zp4sLc3564BIEipCc.S', 'admin', NULL),
+(2, 'rajesh.sharma@estatelink.com', '$2b$10$FVtUZBLpvIb5t6Np5QUh5OsHrCDliPo1S4Zp4sLc3564BIEipCc.S', 'broker', 1),
+(3, 'priya.patel@estatelink.com', '$2b$10$FVtUZBLpvIb5t6Np5QUh5OsHrCDliPo1S4Zp4sLc3564BIEipCc.S', 'broker', 2),
+(4, 'amit.verma@estatelink.com', '$2b$10$FVtUZBLpvIb5t6Np5QUh5OsHrCDliPo1S4Zp4sLc3564BIEipCc.S', 'broker', 3),
+(5, 'sneha.iyer@estatelink.com', '$2b$10$FVtUZBLpvIb5t6Np5QUh5OsHrCDliPo1S4Zp4sLc3564BIEipCc.S', 'broker', 4),
+(6, 'rohan.mehta@gmail.com', '$2b$10$FVtUZBLpvIb5t6Np5QUh5OsHrCDliPo1S4Zp4sLc3564BIEipCc.S', 'client', 1),
+(7, 'vikram.m@techcorp.in', '$2b$10$FVtUZBLpvIb5t6Np5QUh5OsHrCDliPo1S4Zp4sLc3564BIEipCc.S', 'client', 2),
+(8, 'arjun.rao@finworld.com', '$2b$10$FVtUZBLpvIb5t6Np5QUh5OsHrCDliPo1S4Zp4sLc3564BIEipCc.S', 'client', 3),
+(9, 'dr.suresh@medicare.org', '$2b$10$FVtUZBLpvIb5t6Np5QUh5OsHrCDliPo1S4Zp4sLc3564BIEipCc.S', 'client', 4),
+(10, 'ananya.sen@designstudio.io', '$2b$10$FVtUZBLpvIb5t6Np5QUh5OsHrCDliPo1S4Zp4sLc3564BIEipCc.S', 'client', 5),
+(11, 'sunita.gupta@outlook.com', '$2b$10$FVtUZBLpvIb5t6Np5QUh5OsHrCDliPo1S4Zp4sLc3564BIEipCc.S', 'client', 6);
 
 -- ============================================================================
 -- 2. Seed: Clients (Covering all ENUM client_types)

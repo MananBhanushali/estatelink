@@ -23,6 +23,7 @@ DROP TABLE IF EXISTS Leases;
 DROP TABLE IF EXISTS Property_Tenant_Type;
 DROP TABLE IF EXISTS Properties;
 DROP TABLE IF EXISTS Commission;
+DROP TABLE IF EXISTS Users;
 DROP TABLE IF EXISTS Clients;
 DROP TABLE IF EXISTS Brokers;
 
@@ -35,6 +36,18 @@ CREATE TABLE Brokers (
     email VARCHAR(100) NOT NULL UNIQUE,
     phone VARCHAR(20),
     join_date DATE DEFAULT (CURRENT_DATE)
+);
+
+-- ============================================================================
+-- Auth: Users (login credentials mapped to Brokers/Clients)
+-- ============================================================================
+CREATE TABLE Users (
+    user_id INT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    role ENUM('admin', 'broker', 'client') NOT NULL,
+    ref_id INT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ============================================================================
