@@ -128,3 +128,16 @@
     @apply font-sans;
   }
 }
+
+@layer utilities {
+  /* EstateLink brand accents: deep blue → emerald */
+  .brand-gradient-bg {
+    @apply bg-gradient-to-r from-blue-700 via-blue-600 to-emerald-500;
+  }
+  .brand-gradient-text {
+    @apply bg-gradient-to-r from-blue-500 to-emerald-400 bg-clip-text text-transparent;
+  }
+  .brand-gradient-subtle {
+    @apply bg-gradient-to-br from-blue-600/10 via-transparent to-emerald-500/10;
+  }
+}
