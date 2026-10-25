@@ -140,4 +140,90 @@
   .brand-gradient-subtle {
     @apply bg-gradient-to-br from-blue-600/10 via-transparent to-emerald-500/10;
   }
+
+  .transition-delay-100 {
+    transition-delay: 100ms;
+  }
+  .transition-delay-200 {
+    transition-delay: 200ms;
+  }
+  .transition-delay-300 {
+    transition-delay: 300ms;
+  }
+  .transition-delay-400 {
+    transition-delay: 400ms;
+  }
+  .transition-delay-500 {
+    transition-delay: 500ms;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes float {
+    0% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+    100% {
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes pulse-ring {
+    0% {
+      transform: scale(0.8);
+      opacity: 0.5;
+    }
+    100% {
+      transform: scale(1.3);
+      opacity: 0;
+    }
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.6s ease-out forwards;
+  }
+  .animate-slide-up {
+    animation: slideUp 0.7s ease-out forwards;
+  }
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+  .animate-pulse-ring {
+    animation: pulse-ring 3s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-fade-in,
+    .animate-slide-up,
+    .animate-float,
+    .animate-pulse-ring,
+    [class*="transition-delay-"] {
+      animation: none !important;
+      transition: none !important;
+    }
+    html {
+      scroll-behavior: auto !important;
+    }
+  }
 }
