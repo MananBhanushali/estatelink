@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useState, useEffect, type FormEvent } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Building2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -42,6 +42,25 @@ export default function RegisterPage() {
   const [role, setRole] = useState<"broker" | "client">("client");
   const [clientType, setClientType] = useState<string>("bachelor");
   const [pending, setPending] = useState(false);
+  const pathname = usePathname();
+
+  // Clear the form whenever the user arrives on this page (fresh visit or
+  // coming back via the browser's back button) so previously entered
+  // details don't linger in the sign-up form.
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setName("");
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setEmail("");
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setPhone("");
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setPassword("");
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setRole("client");
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setClientType("bachelor");
+  }, [pathname]);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();

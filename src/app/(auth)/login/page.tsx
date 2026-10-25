@@ -1,8 +1,8 @@
 "use client";
 
-import { Suspense, useState, type FormEvent } from "react";
+import { Suspense, useState, useEffect, type FormEvent } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { Building2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -33,6 +33,17 @@ function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [pending, setPending] = useState(false);
+  const pathname = usePathname();
+
+  // Clear the form whenever the user arrives on this page (fresh visit or
+  // coming back via the browser's back button) so previously entered
+  // details don't linger in the sign-in form.
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setEmail("");
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setPassword("");
+  }, [pathname]);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
