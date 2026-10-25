@@ -11,6 +11,7 @@ import {
   Trophy,
   Users,
   Wallet,
+  Shield,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -45,7 +46,7 @@ export function navLinksFor(role: Role): NavLink[] {
         { href: "/admin/clients", label: "Clients", icon: Users },
         { href: "/admin/properties", label: "Properties", icon: Building2 },
         { href: "/admin/enquiries", label: "Enquiries", icon: ClipboardList },
-        { href: "/admin/deals", label: "Deals", icon: Wallet },
+        { href: "/admin/deals", label: "Deals", icon: Shield },
       ];
   }
 }
