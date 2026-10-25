@@ -268,9 +268,13 @@ SELECT
     d.company_earning AS materialized_company_earning,
     d.broker_earning AS materialized_broker_earning
 FROM Deals d
+-- [JOIN]: Inner join Properties — Links each deal to its transacted property to access location and associated commission ID
 JOIN Properties p ON d.property_id = p.property_id
+-- [JOIN]: Inner join Commission — Retrieves owner and client brokerage percentage cuts configured for the property to calculate earnings dynamically
 JOIN Commission comm ON p.commission_id = comm.commission_id
+-- [JOIN]: Inner join Brokers — Denormalizes broker details (id, name) responsible for closing the deal
 JOIN Brokers b ON d.broker_id = b.broker_id
+-- [JOIN]: Inner join Clients — Denormalizes client details (id, name) of the customer who completed the transaction
 JOIN Clients c ON d.client_id = c.client_id;
 
 -- 2. Broker Leaderboard View
@@ -281,16 +285,26 @@ SELECT
     b.email AS broker_email,
     b.phone AS broker_phone,
     b.join_date,
+    -- [AGGREGATE FUNCTION]: COUNT(DISTINCT) — Calculates total unique deals closed by each broker, avoiding inflated counts caused by multiple joined reviews
     COUNT(DISTINCT d.deal_id) AS total_deals_closed,
+    -- [AGGREGATE FUNCTION]: Conditional SUM — Tallies only closed property sales (deal_type = 'sale'), defaulting to 0 via COALESCE if none exist
     COALESCE(SUM(CASE WHEN d.deal_type = 'sale' THEN 1 ELSE 0 END), 0) AS sales_closed,
+    -- [AGGREGATE FUNCTION]: Conditional SUM — Tallies only closed rental leases (deal_type = 'rental'), defaulting to 0 via COALESCE if none exist
     COALESCE(SUM(CASE WHEN d.deal_type = 'rental' THEN 1 ELSE 0 END), 0) AS rentals_closed,
+    -- [AGGREGATE FUNCTION]: SUM — Computes the gross monetary volume of all transactions closed by the broker (defaults to 0 if no deals)
     COALESCE(SUM(d.deal_value), 0) AS total_deal_volume,
+    -- [AGGREGATE FUNCTION]: SUM — Computes cumulative commission earnings accrued by the broker across closed deals
     COALESCE(SUM(d.broker_earning), 0) AS total_broker_earnings,
+    -- [AGGREGATE FUNCTION]: SUM — Computes total brokerage revenue contributed to the company by the broker
     COALESCE(SUM(d.company_earning), 0) AS total_company_contribution,
+    -- [AGGREGATE FUNCTION]: AVG — Computes average client rating score (1-5 scale) across all reviews received by the broker
     ROUND(AVG(r.rating), 2) AS average_rating,
+    -- [AGGREGATE FUNCTION]: COUNT(DISTINCT) — Counts total unique client reviews received by each broker without Cartesian product inflation
     COUNT(DISTINCT r.review_id) AS total_reviews
 FROM Brokers b
+-- [JOIN]: LEFT JOIN Deals — Preserves all registered brokers in leaderboard rankings even if they have not yet closed any deals (returns 0 instead of omitting them)
 LEFT JOIN Deals d ON b.broker_id = d.broker_id
+-- [JOIN]: LEFT JOIN Reviews — Preserves brokers who have not yet received client ratings/reviews, preventing exclusion from the leaderboard
 LEFT JOIN Reviews r ON b.broker_id = r.broker_id
 GROUP BY b.broker_id, b.name, b.email, b.phone, b.join_date;
 
@@ -316,11 +330,16 @@ SELECT
     l.lease_type,
     l.security_deposit,
     l.duration_months,
+    -- [AGGREGATE FUNCTION]: GROUP_CONCAT — Combines normalized 1NF/2NF tenant criteria rows into a single comma-separated list per property
     GROUP_CONCAT(DISTINCT ptt.tenant_type ORDER BY ptt.tenant_type SEPARATOR ', ') AS eligible_tenant_types
 FROM Properties p
+-- [JOIN]: INNER JOIN Brokers — Links property listing to its assigned broker to display agent name and contact information
 JOIN Brokers b ON p.broker_id = b.broker_id
+-- [JOIN]: INNER JOIN Commission — Links property listing to its commission tier to expose owner and client brokerage percentage cuts
 JOIN Commission comm ON p.commission_id = comm.commission_id
+-- [JOIN]: LEFT JOIN Leases — Includes rental lease terms (deposit, duration) if applicable; uses LEFT JOIN so properties for sale (without leases) are not omitted
 LEFT JOIN Leases l ON p.property_id = l.property_id
+-- [JOIN]: LEFT JOIN Property_Tenant_Type — Includes allowed tenant types; uses LEFT JOIN so properties without specific tenant restrictions are not omitted
 LEFT JOIN Property_Tenant_Type ptt ON p.property_id = ptt.property_id
 GROUP BY p.property_id, p.owner_name, p.owner_contact, p.location, p.square_feet, p.bedrooms, 
          p.value, p.status, p.broker_id, b.name, b.email, b.phone, p.commission_id, 
@@ -337,6 +356,8 @@ BEGIN
     -- Reactivate properties whose lease tenure has completed
     UPDATE Properties
     SET status = 'available'
+    -- [SUBQUERY]: Uncorrelated subquery dynamically selects property IDs from Deals that are currently 'ongoing' but have passed their rental_end_date.
+    -- Used here to filter Properties without joining tables directly in the UPDATE statement, ensuring a decoupled and safe bulk status transition.
     WHERE property_id IN (
         SELECT property_id FROM Deals
         WHERE deal_status = 'ongoing' AND rental_end_date < CURRENT_DATE
