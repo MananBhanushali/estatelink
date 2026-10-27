@@ -63,11 +63,17 @@ export function NavLinks({
   const pathname = usePathname();
   const links = navLinksFor(role);
 
+  // Find the single best-matching link for current pathname
+  const activeLink = links
+    .filter(
+      (link) => pathname === link.href || pathname.startsWith(`${link.href}/`)
+    )
+    .sort((a, b) => b.href.length - a.href.length)[0];
+
   return (
     <nav className="flex flex-col gap-1">
       {links.map((link) => {
-        const active =
-          pathname === link.href || pathname.startsWith(`${link.href}/`);
+        const active = activeLink?.href === link.href;
         const Icon = link.icon;
         return (
           <Link

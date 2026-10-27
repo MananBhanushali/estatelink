@@ -137,9 +137,6 @@ export default function AdminBrokersPage() {
             className="pl-9"
           />
         </div>
-        <Link href="/admin/clients">
-          <Button>View All Clients</Button>
-        </Link>
       </div>
 
       {/* Leaderboard Table */}

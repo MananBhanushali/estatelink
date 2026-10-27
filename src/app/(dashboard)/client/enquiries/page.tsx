@@ -32,6 +32,7 @@ interface EnquiryRow {
   property_value: string;
   property_status: string;
   broker_name: string;
+  is_rental?: boolean | number;
 }
 
 const STATUS_VARIANT: Record<string, "default" | "secondary" | "destructive" | "outline" | "ghost"> = {
@@ -155,6 +156,7 @@ export default function ClientEnquiriesPage() {
                     </Link>
                     <p className="text-xs text-muted-foreground">
                       ₹{Number(e.property_value).toLocaleString()}
+                      {Boolean(e.is_rental) ? "/month" : ""}
                     </p>
                   </TableCell>
                   <TableCell>

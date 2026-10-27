@@ -28,6 +28,7 @@ interface PropertyRow {
   status: string;
   broker_id: number;
   commission_id: number;
+  lease_id: number | null;
 }
 
 const STATUS_VARIANT: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
@@ -149,7 +150,13 @@ export default function BrokerPropertiesPage() {
                     </Link>
                   </TableCell>
                   <TableCell className="text-sm">
-                    ₹{Number(p.value).toLocaleString()}
+                    {(() => {
+                      const price = Number(p.value);
+                      const isRental = p.lease_id !== null;
+                      return isRental
+                        ? `₹${price.toLocaleString()}/mo`
+                        : `₹${(price / 1e7).toLocaleString(undefined, { maximumFractionDigits: 2 })} Cr`;
+                    })()}
                   </TableCell>
                   <TableCell>
                     <Badge

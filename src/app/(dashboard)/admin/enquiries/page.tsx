@@ -269,7 +269,7 @@ export default function AdminEnquiriesPage() {
                           )}
                           {e.status === "in_progress" && (
                             <Link
-                              href={`/broker/enquiries/${e.enquiry_id}/convert`}
+                              href={`/admin/enquiries/${e.enquiry_id}/convert`}
                               className="px-2.5 py-1 text-xs border rounded hover:bg-primary hover:text-primary-foreground transition-colors font-medium inline-flex items-center"
                               title="Convert to deal"
                             >

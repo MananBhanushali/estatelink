@@ -305,10 +305,12 @@ export default function ConvertEnquiryPage() {
                 </Select>
               </div>
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium">Deal Value (₹)</label>
+                <label className="text-sm font-medium">
+                  {isRental ? "Deal Value (Monthly Rent ₹)" : "Deal Value (₹)"}
+                </label>
                 <Input
                   type="number"
-                  placeholder="0"
+                  placeholder={isRental ? "25000" : "0"}
                   value={dealValue}
                   onChange={(e) => setDealValue(e.target.value)}
                 />

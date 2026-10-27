@@ -22,14 +22,17 @@ export function StarRating({
   size = "md",
   showText = false,
 }: StarRatingProps) {
-  const fullStars = Math.floor(rating);
-  const hasHalfStar = rating % 1 >= 0.5;
+  // Coerce to a number: MySQL DECIMAL columns (e.g. ROUND(AVG(rating),2))
+  // are returned as strings by mysql2 unless decimalNumbers: true is set.
+  const ratingValue = Number(rating) || 0;
+  const fullStars = Math.floor(ratingValue);
+  const hasHalfStar = ratingValue % 1 >= 0.5;
   const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
 
   return (
     <div
       className={cn("flex items-center gap-1", className)}
-      aria-label={`Rating ${rating} out of 5`}
+      aria-label={`Rating ${ratingValue} out of 5`}
     >
       {[...Array(fullStars)].map((_, i) => (
         <Star
@@ -56,7 +59,7 @@ export function StarRating({
       ))}
       {showText && (
         <span className="ml-1 text-xs text-muted-foreground">
-          {rating.toFixed(1)} / 5
+          {ratingValue.toFixed(1)} / 5
         </span>
       )}
     </div>

@@ -139,12 +139,12 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST /api/properties — create listing (broker only, transaction)
+// POST /api/properties — create listing (broker or admin, transaction)
 export async function POST(request: NextRequest) {
   const user = await getAuthUser();
   if (!user) return unauthorized();
-  if (user.role !== "broker") return forbidden();
-  if (!user.refId) return badRequest("Broker profile not linked");
+  if (user.role !== "broker" && user.role !== "admin") return forbidden();
+  if (user.role === "broker" && !user.refId) return badRequest("Broker profile not linked");
 
   try {
     const body = await request.json();
@@ -159,7 +159,16 @@ export async function POST(request: NextRequest) {
       client_brokerage_percent,
       tenant_types,
       lease,
+      broker_id: bodyBrokerId,
     } = body;
+
+    // Admin must supply a broker_id; broker uses their own refId
+    const effectiveBrokerId: number =
+      user.role === "admin" ? Number(bodyBrokerId) : (user.refId as number);
+
+    if (user.role === "admin" && (!bodyBrokerId || isNaN(effectiveBrokerId))) {
+      return badRequest("broker_id is required when listing as admin");
+    }
 
     if (!owner_name || !location || !value) {
       return badRequest("owner_name, location, and value are required");
@@ -183,7 +192,7 @@ export async function POST(request: NextRequest) {
       const [commResult] = await connection.query<ResultSetHeader>(
         `INSERT INTO Commission (owner_brokerage_percent, client_brokerage_percent, broker_id)
          VALUES (?, ?, ?)`,
-        [owner_brokerage_percent, client_brokerage_percent, user.refId]
+        [owner_brokerage_percent, client_brokerage_percent, effectiveBrokerId]
       );
       const commissionId = commResult.insertId;
 
@@ -197,7 +206,7 @@ export async function POST(request: NextRequest) {
           square_feet ?? null,
           bedrooms ?? null,
           value,
-          user.refId,
+          effectiveBrokerId,
           commissionId,
         ]
       );

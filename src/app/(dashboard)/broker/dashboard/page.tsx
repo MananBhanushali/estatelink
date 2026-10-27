@@ -87,6 +87,7 @@ interface EnquiryRow {
   enquiry_date: string;
   status: string;
   notes: string | null;
+  is_rental?: boolean | number;
 }
 
 export default function BrokerDashboardPage() {
@@ -317,7 +318,7 @@ export default function BrokerDashboardPage() {
                       <p className="text-xs text-muted-foreground">
                         {new Date(e.enquiry_date).toLocaleDateString()} · ₹{Number(
                           e.property_value
-                        ).toLocaleString()}
+                        ).toLocaleString()}{Boolean(e.is_rental) ? "/month" : ""}
                       </p>
                       <div className="flex items-center gap-2">
                         {e.status === "open" && (

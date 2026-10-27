@@ -75,7 +75,7 @@ export async function PropertyDetail({ id }: { id: number }) {
   }
 
   const price = Number(p.value);
-  const isRental = price < 100000;
+  const isRental = p.lease_id !== null;
 
   return (
     <>

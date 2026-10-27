@@ -61,6 +61,7 @@ interface EnquiryRow {
   property_bedrooms?: number | null;
   property_owner_name?: string | null;
   broker_name: string;
+  is_rental?: boolean | number;
 }
 
 const STATUS_VARIANT: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
@@ -270,6 +271,7 @@ export default function BrokerEnquiriesPage() {
                             </TableCell>
                             <TableCell className="text-sm">
                               ₹{Number(e.property_value).toLocaleString()}
+                              {Boolean(e.is_rental) ? "/month" : ""}
                             </TableCell>
                             <TableCell className="text-sm text-muted-foreground">
                               {new Date(e.enquiry_date).toLocaleDateString()}
@@ -385,7 +387,7 @@ export default function BrokerEnquiriesPage() {
                     <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                       <span className="font-semibold text-foreground">
                         ₹{Number(selectedEnquiry.property_value).toLocaleString()}
-                        {Number(selectedEnquiry.property_value) < 1000000 ? "/mo" : ""}
+                        {Boolean(selectedEnquiry.is_rental) ? "/month" : ""}
                       </span>
                       {selectedEnquiry.property_bedrooms != null && (
                         <>
@@ -435,8 +437,13 @@ export default function BrokerEnquiriesPage() {
                   <span>{new Date(selectedEnquiry.enquiry_date).toLocaleDateString()}</span>
                 </div>
                 <div>
-                  <span className="text-muted-foreground text-xs block">Property Value</span>
-                  <span className="font-semibold">₹{Number(selectedEnquiry.property_value).toLocaleString()}</span>
+                  <span className="text-muted-foreground text-xs block">
+                    {Boolean(selectedEnquiry.is_rental) ? "Monthly Rent" : "Property Value"}
+                  </span>
+                  <span className="font-semibold">
+                    ₹{Number(selectedEnquiry.property_value).toLocaleString()}
+                    {Boolean(selectedEnquiry.is_rental) ? "/month" : ""}
+                  </span>
                 </div>
                 <div>
                   <span className="text-muted-foreground text-xs block">Status</span>

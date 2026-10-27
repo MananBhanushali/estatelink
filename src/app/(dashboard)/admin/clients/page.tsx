@@ -39,6 +39,7 @@ export default function AdminClientsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const [clientType, setClientType] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -66,8 +67,10 @@ export default function AdminClientsPage() {
     };
   }, []);
 
-  const filteredClients = clients.filter((c) =>
-    c.name.toLowerCase().includes(search.toLowerCase())
+  const filteredClients = clients.filter(
+    (c) =>
+      c.name.toLowerCase().includes(search.toLowerCase()) &&
+      (!clientType || c.client_type === clientType)
   );
 
   if (loading) {
@@ -114,12 +117,20 @@ export default function AdminClientsPage() {
           />
         </div>
         <div className="flex flex-wrap gap-2">
+          <Button
+            key="all"
+            variant={clientType ? "outline" : "default"}
+            size="sm"
+            onClick={() => setClientType("")}
+          >
+            All Types
+          </Button>
           {clientTypes.map((t) => (
             <Button
               key={t}
-              variant="outline"
+              variant={clientType === t ? "default" : "outline"}
               size="sm"
-              onClick={() => setSearch(t)}
+              onClick={() => setClientType(t)}
             >
               {t.charAt(0).toUpperCase() + t.slice(1).replace(/_/g, " ")}
             </Button>

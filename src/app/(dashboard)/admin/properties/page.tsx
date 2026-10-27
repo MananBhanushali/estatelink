@@ -24,6 +24,7 @@ import {
 import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 import { PlusCircle } from "lucide-react";
 
 interface PropertyRow {
@@ -45,11 +46,19 @@ const STATUS_VARIANT: Record<string, "default" | "secondary" | "destructive" | "
   ongoing_rental: "secondary",
 };
 
+const STATUS_OPTIONS = [
+  { value: "all", label: "All" },
+  { value: "available", label: "Available" },
+  { value: "sold", label: "Sold" },
+  { value: "ongoing_rental", label: "Ongoing Rental" },
+] as const;
+
 export default function AdminPropertiesPage() {
   const [properties, setProperties] = useState<PropertyRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
 
   useEffect(() => {
     let cancelled = false;
@@ -79,12 +88,18 @@ export default function AdminPropertiesPage() {
     };
   }, []);
 
-  const filteredProperties = properties.filter(
-    (p) =>
+  const filteredProperties = properties.filter((p) => {
+    const matchesSearch =
+      search === "" ||
       p.location.toLowerCase().includes(search.toLowerCase()) ||
       p.owner_name.toLowerCase().includes(search.toLowerCase()) ||
-      p.broker_name.toLowerCase().includes(search.toLowerCase())
-  );
+      p.broker_name.toLowerCase().includes(search.toLowerCase());
+
+    const matchesStatus =
+      statusFilter === "all" || p.status === statusFilter;
+
+    return matchesSearch && matchesStatus;
+  });
 
   if (loading) {
     return (
@@ -124,7 +139,7 @@ export default function AdminPropertiesPage() {
         title="Manage Properties"
         description="View and manage all properties on the platform."
         action={
-          <Link href="/broker/properties/new">
+          <Link href="/admin/properties/new">
             <Button>
               <PlusCircle className="size-4 mr-2" />
               List Property
@@ -134,36 +149,52 @@ export default function AdminPropertiesPage() {
       />
 
       {/* Status summary */}
-      <div className="flex flex-wrap gap-3">
-        {["available", "sold", "ongoing_rental"].map((status) => (
-          <Button
-            key={status}
-            variant="outline"
-            size="sm"
-            onClick={() =>
-              setSearch((s) =>
-                s === status ? "" : status
-              )
-            }
-            className={`flex items-center gap-2 ${
-              search === status ? "bg-primary text-primary-foreground" : ""
-            }`}
-          >
-            <Badge variant={STATUS_VARIANT[status] ?? "secondary"} className="mr-1 h-5 w-5">
-              {status.charAt(0).toUpperCase() + status.slice(1).replace(/_/g, " ")}
-            </Badge>
-            {statusCounts[status] || 0}
-          </Button>
-        ))}
+      <div className="flex flex-wrap items-center gap-2">
+        {STATUS_OPTIONS.map((item) => {
+          const isSelected = statusFilter === item.value;
+          const count =
+            item.value === "all"
+              ? properties.length
+              : statusCounts[item.value] || 0;
+
+          return (
+            <Button
+              key={item.value}
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                setStatusFilter((curr) =>
+                  curr === item.value && item.value !== "all" ? "all" : item.value
+                )
+              }
+              className={cn(
+                "h-8 gap-2 rounded-lg px-2.5 text-xs transition-all",
+                isSelected
+                  ? "border-primary bg-primary/5 text-foreground ring-1 ring-primary shadow-xs font-medium"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+              )}
+            >
+              <Badge
+                variant={
+                  item.value === "all"
+                    ? "outline"
+                    : STATUS_VARIANT[item.value] ?? "secondary"
+                }
+              >
+                {item.label}
+              </Badge>
+              <span className="font-semibold text-foreground">{count}</span>
+            </Button>
+          );
+        })}
       </div>
 
       <Card>
         <CardHeader>
           <CardTitle className="text-sm font-semibold">All Properties</CardTitle>
           <CardDescription>
-            {filteredProperties.length} property{
-              filteredProperties.length !== 1 ? "s" : ""
-            } found.
+            {filteredProperties.length}{" "}
+            {filteredProperties.length === 1 ? "property" : "properties"} found.
           </CardDescription>
         </CardHeader>
         <CardContent>
