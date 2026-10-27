@@ -7,8 +7,11 @@ import type { Role } from "@/lib/hooks/use-auth";
 export function SidebarContent({ role }: { role: Role }) {
   return (
     <div className="flex h-full flex-col gap-4 p-4">
-      <Link href="/" className="flex items-center gap-2 px-2 py-1">
-        <span className="flex size-8 items-center justify-center rounded-lg brand-gradient-bg text-white">
+      <Link
+        href="/"
+        className="flex items-center gap-2 px-2 py-1 group hover:opacity-85 transition-opacity cursor-pointer"
+      >
+        <span className="flex size-8 items-center justify-center rounded-lg brand-gradient-bg text-white group-hover:scale-105 transition-transform">
           <Building2 className="size-5" />
         </span>
         <span className="text-lg font-bold tracking-tight">

@@ -37,7 +37,7 @@ function initials(name: string): string {
 }
 
 export function Header() {
-  const { user, logout } = useAuth();
+  const { user, loading, logout } = useAuth();
   const router = useRouter();
   const [open, setOpen] = useState(false);
 
@@ -45,6 +45,7 @@ export function Header() {
     await logout();
     toast.success("Signed out");
     router.replace("/login");
+    router.refresh();
   }
 
   return (
@@ -67,7 +68,9 @@ export function Header() {
 
       <div className="ml-auto flex items-center gap-1">
         <ThemeToggle />
-        {user ? (
+        {loading ? (
+          <div className="size-8 rounded-full bg-muted/60 animate-pulse" />
+        ) : user ? (
           <DropdownMenu>
             <DropdownMenuTrigger
               render={

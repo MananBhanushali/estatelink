@@ -41,7 +41,6 @@ function LoginForm() {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setEmail("");
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPassword("");
   }, [pathname]);
 
@@ -56,11 +55,12 @@ function LoginForm() {
       const user = await login(email, password);
       toast.success(`Welcome back, ${user.name}`);
       const next = searchParams.get("next");
-      router.replace(
+      const target =
         next && next.startsWith("/") && !next.startsWith("//")
           ? next
-          : roleHome(user.role)
-      );
+          : roleHome(user.role);
+      router.replace(target);
+      router.refresh();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Login failed");
     } finally {

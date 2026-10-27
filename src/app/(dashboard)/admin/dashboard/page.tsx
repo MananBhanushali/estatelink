@@ -27,6 +27,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogClose,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -352,14 +353,18 @@ export default function AdminDashboardPage() {
                         </DialogDescription>
                       </DialogHeader>
                       <DialogFooter>
-                        <Button type="button" variant="outline" onClick={() => {}}>
-                          Cancel
-                        </Button>
+                        <DialogClose
+                          render={
+                            <Button type="button" variant="outline" className="w-full sm:w-auto">
+                              Cancel
+                            </Button>
+                          }
+                        />
                         <Button
                           type="button"
                           onClick={handleRefresh}
                           disabled={refreshing}
-                          className="w-full bg-destructive text-destructive-foreground hover:bg-destructive"
+                          className="w-full sm:w-auto bg-destructive text-destructive-foreground hover:bg-destructive"
                         >
                           {refreshing ? "Refreshing…" : "Confirm Refresh"}
                         </Button>

@@ -154,11 +154,12 @@ export default function NewReviewPage({
             />
           </div>
         </CardContent>
-        <CardFooter>
+        <CardFooter className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
           <Button
             type="button"
             onClick={() => router.push("/client/enquiries")}
             variant="outline"
+            className="w-full sm:w-auto"
           >
             Cancel
           </Button>
@@ -192,7 +193,7 @@ export default function NewReviewPage({
                 setSubmitting(false);
               }
             }}
-            className="w-full"
+            className="w-full sm:w-auto"
           >
             {submitting ? "Submitting…" : "Submit Review"}
           </Button>

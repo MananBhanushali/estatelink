@@ -4,6 +4,8 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/layout/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 
+import { AuthProvider } from "@/lib/hooks/use-auth";
+
 const inter = Inter({
   variable: "--font-sans",
   subsets: ["latin"],
@@ -23,8 +25,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="en" className={`${inter.variable} h-full antialiased`} suppressHydrationWarning>
       <body className="min-h-full font-sans">
         <ThemeProvider>
-          {children}
-          <Toaster position="top-right" richColors closeButton />
+          <AuthProvider>
+            {children}
+            <Toaster position="top-right" richColors closeButton />
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

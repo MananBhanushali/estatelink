@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
   Card,
@@ -27,6 +27,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   Loader2,
   PlusCircle,
+  ExternalLink,
 } from "lucide-react";
 
 interface EnquiryRow {
@@ -43,21 +44,16 @@ interface EnquiryRow {
   property_value: string;
   property_status: string;
   broker_name: string;
+  owner_brokerage_percent?: number | string;
+  client_brokerage_percent?: number | string;
+  is_rental?: boolean | number;
+  lease_duration_months?: number | null;
 }
 
-interface ConvertPageProps {
-  params: Promise<{ id: string }>;
-}
-
-export default function ConvertEnquiryPage({
-  params,
-}: ConvertPageProps) {
+export default function ConvertEnquiryPage() {
   const router = useRouter();
-  const [enquiryId, setEnquiryId] = useState<number | null>(null);
-
-  useEffect(() => {
-    params.then(({ id }) => setEnquiryId(Number(id)));
-  }, [params]);
+  const { id } = useParams<{ id: string }>();
+  const enquiryId = Number(id);
 
   const [enquiry, setEnquiry] = useState<EnquiryRow | null>(null);
   const [loading, setLoading] = useState(true);
@@ -69,32 +65,25 @@ export default function ConvertEnquiryPage({
   const [dealValue, setDealValue] = useState("");
   const [rentalStartDate, setRentalStartDate] = useState("");
   const [rentalEndDate, setRentalEndDate] = useState("");
-  const [commissionPreview, setCommissionPreview] = useState<{
-    company_earning: number;
-    broker_earning: number;
-  } | null>(null);
 
-  const calculateCommission = useCallback(() => {
-    if (!enquiry || !dealValue) {
-      setCommissionPreview(null);
-      return;
-    }
+  const commissionPreview = useMemo(() => {
+    if (!enquiry || !dealValue) return null;
     const value = Number(dealValue);
-    if (!value || value <= 0) {
-      setCommissionPreview(null);
-      return;
-    }
-    // The API calculates commission based on property's commission rates
-    // For preview, we show estimated values - actual computed by server
-    // We don't have commission % here from the enquiry API, so just show deal value
-    setCommissionPreview({
-      company_earning: 0,
-      broker_earning: 0,
-    });
+    if (!value || value <= 0) return null;
+
+    const ownerPct = Number(enquiry.owner_brokerage_percent ?? 0);
+    const clientPct = Number(enquiry.client_brokerage_percent ?? 0);
+
+    return {
+      company_earning: Math.round(((value * ownerPct) / 100) * 100) / 100,
+      broker_earning: Math.round(((value * clientPct) / 100) * 100) / 100,
+      owner_pct: ownerPct,
+      client_pct: clientPct,
+    };
   }, [enquiry, dealValue]);
 
   useEffect(() => {
-    if (!enquiryId) return;
+    if (!enquiryId || isNaN(enquiryId)) return;
     let cancelled = false;
     async function loadEnquiry() {
       try {
@@ -109,9 +98,30 @@ export default function ConvertEnquiryPage({
         if (!res.ok) throw new Error("Failed to load enquiry");
         const data = await res.json();
         if (!cancelled) {
-          setEnquiry(data.enquiry ?? null);
-          setDealValue(data.enquiry?.property_value || "");
-          calculateCommission();
+          const enq: EnquiryRow | null = data.enquiry ?? null;
+          setEnquiry(enq);
+          setDealValue(enq?.property_value || "");
+
+          const isRentalProperty = Boolean(
+            enq?.is_rental === 1 ||
+            enq?.is_rental === true ||
+            enq?.property_status === "ongoing_rental"
+          );
+
+          if (isRentalProperty) {
+            setDealType("rental");
+            const today = new Date();
+            const startDateStr = today.toISOString().split("T")[0];
+            setRentalStartDate(startDateStr);
+
+            const durationMonths = Number(enq?.lease_duration_months) || 12;
+            const endDate = new Date(today);
+            endDate.setMonth(endDate.getMonth() + durationMonths);
+            setRentalEndDate(endDate.toISOString().split("T")[0]);
+          } else {
+            setDealType("sale");
+          }
+
           setLoading(false);
         }
       } catch (err) {
@@ -125,11 +135,11 @@ export default function ConvertEnquiryPage({
     return () => {
       cancelled = true;
     };
-  }, [enquiryId, calculateCommission]);
+  }, [enquiryId]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!enquiryId) return;
+  const handleSubmit = async (e?: React.FormEvent) => {
+    e?.preventDefault();
+    if (!enquiryId || isNaN(enquiryId)) return;
 
     const deal_type = dealType;
     const value = Number(dealValue);
@@ -231,7 +241,15 @@ export default function ConvertEnquiryPage({
             <label className="text-xs font-semibold text-muted-foreground uppercase">
               Property
             </label>
-            <p className="text-sm">{enquiry.property_location}</p>
+            <Link
+              href={`/properties/${enquiry.property_id}`}
+              target="_blank"
+              rel="noreferrer"
+              className="text-sm font-medium hover:underline inline-flex items-center gap-1 hover:text-primary transition-colors"
+            >
+              <span>{enquiry.property_location}</span>
+              <ExternalLink className="size-3 opacity-70" />
+            </Link>
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-xs font-semibold text-muted-foreground uppercase">
@@ -275,7 +293,6 @@ export default function ConvertEnquiryPage({
                   value={dealType}
                   onValueChange={(v) => {
                     setDealType(v as "sale" | "rental");
-                    calculateCommission();
                   }}
                 >
                   <SelectTrigger>
@@ -293,10 +310,7 @@ export default function ConvertEnquiryPage({
                   type="number"
                   placeholder="0"
                   value={dealValue}
-                  onChange={(e) => {
-                    setDealValue(e.target.value);
-                    calculateCommission();
-                  }}
+                  onChange={(e) => setDealValue(e.target.value)}
                 />
               </div>
             </div>
@@ -327,18 +341,18 @@ export default function ConvertEnquiryPage({
             <div className="flex flex-col gap-4">
               <div className="flex items-center justify-between pt-2">
                 <span className="text-sm text-muted-foreground">
-                  Company Earning (Owner Brokerage)
+                  Company Earning (Owner Brokerage{enquiry.owner_brokerage_percent ? ` · ${enquiry.owner_brokerage_percent}%` : ""})
                 </span>
                 <span className="text-sm font-medium">
-                  {commissionPreview ? `₹${commissionPreview.company_earning.toLocaleString()}` : "—"}
+                  {commissionPreview ? `₹${commissionPreview.company_earning.toLocaleString("en-IN")}` : "—"}
                 </span>
               </div>
               <div className="flex items-center justify-between pt-2">
                 <span className="text-sm text-muted-foreground">
-                  Broker Earning (Client Brokerage)
+                  Broker Earning (Client Brokerage{enquiry.client_brokerage_percent ? ` · ${enquiry.client_brokerage_percent}%` : ""})
                 </span>
                 <span className="text-sm font-medium">
-                  {commissionPreview ? `₹${commissionPreview.broker_earning.toLocaleString()}` : "—"}
+                  {commissionPreview ? `₹${commissionPreview.broker_earning.toLocaleString("en-IN")}` : "—"}
                 </span>
               </div>
               <p className="text-xs text-muted-foreground">
@@ -348,15 +362,20 @@ export default function ConvertEnquiryPage({
             </div>
           </form>
         </CardContent>
-        <CardFooter>
-          <Button type="button" onClick={() => router.push("/broker/enquiries")} variant="outline">
+        <CardFooter className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
+          <Button
+            type="button"
+            onClick={() => router.push("/broker/enquiries")}
+            variant="outline"
+            className="w-full sm:w-auto"
+          >
             Cancel
           </Button>
           <Button
             type="button"
             onClick={handleSubmit}
             disabled={submitting}
-            className="w-full bg-primary text-primary-foreground hover:bg-primary/80"
+            className="w-full sm:w-auto"
           >
             {submitting ? (
               <>

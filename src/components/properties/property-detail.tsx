@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { User, Phone, MapPin, Home, Calendar, Wallet } from "lucide-react";
+import { getAuthUser } from "@/lib/auth";
 
 export interface PropertyDetailRow extends RowDataPacket {
   property_id: number;
@@ -62,13 +63,33 @@ export async function PropertyDetail({ id }: { id: number }) {
   );
   const tenantTypes = ttRows.map((t) => t.tenant_type as string);
 
+  // Check if the current client has already enquired for this property
+  const authUser = await getAuthUser();
+  let alreadyEnquired = false;
+  if (authUser?.role === "client" && authUser.refId) {
+    const [existingEnquiry] = await pool.query<RowDataPacket[]>(
+      "SELECT enquiry_id FROM Enquiries WHERE client_id = ? AND property_id = ?",
+      [authUser.refId, id]
+    );
+    alreadyEnquired = existingEnquiry.length > 0;
+  }
+
   const price = Number(p.value);
   const isRental = price < 100000;
 
   return (
     <>
-      <PageHeader title="Property Details" description={p.location} />
-      <EnquiryDialog propertyId={p.property_id} propertyLocation={p.location} />
+      <PageHeader
+        title="Property Details"
+        description={p.location}
+        action={
+          <EnquiryDialog
+            propertyId={p.property_id}
+            propertyLocation={p.location}
+            alreadyEnquired={alreadyEnquired}
+          />
+        }
+      />
 
       {/* Hero / image placeholder */}
       <Card className="border-border">
@@ -293,9 +314,12 @@ export async function PropertyDetail({ id }: { id: number }) {
 export function PropertyDetailSkeleton() {
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader title="Property Details" description="Loading…" />
+      <PageHeader
+        title="Property Details"
+        description="Loading…"
+        action={<div className="h-9 w-36 animate-pulse rounded-md bg-muted" />}
+      />
       <div className="flex flex-col gap-4">
-        <div className="h-9 w-1/3 animate-pulse rounded-md bg-muted" />
         <div className="h-24 w-full animate-pulse rounded-md bg-muted" />
         <Card className="border-border">
           <CardContent className="p-4 grid grid-cols-1 sm:grid-cols-3 gap-4">

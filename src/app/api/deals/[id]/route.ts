@@ -3,14 +3,20 @@ import pool from "@/lib/db";
 import { getAuthUser, unauthorized, forbidden, badRequest } from "@/lib/auth";
 import { RowDataPacket } from "mysql2";
 
-// GET /api/deals/[id] — broker (owner) or admin
+// GET /api/deals/[id] — broker (owner), admin, or the client who owns the deal
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const user = await getAuthUser();
   if (!user) return unauthorized();
-  if (user.role !== "broker" && user.role !== "admin") return forbidden();
+  if (
+    user.role !== "broker" &&
+    user.role !== "admin" &&
+    user.role !== "client"
+  ) {
+    return forbidden();
+  }
 
   try {
     const { id } = await params;
@@ -40,14 +46,19 @@ export async function GET(
     if (rows.length === 0) {
       return NextResponse.json({ error: "Deal not found" }, { status: 404 });
     }
-    if (
+    const deal = rows[0];
+    if (user.role === "client") {
+      if (!user.refId || (deal.client_id as number) !== user.refId) {
+        return forbidden();
+      }
+    } else if (
       user.role === "broker" &&
-      (rows[0].broker_id as number) !== user.refId
+      (deal.broker_id as number) !== user.refId
     ) {
       return forbidden();
     }
 
-    return NextResponse.json({ deal: rows[0] });
+    return NextResponse.json({ deal });
   } catch (error) {
     console.error("Deal detail error:", error);
     return NextResponse.json(

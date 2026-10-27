@@ -145,6 +145,7 @@ CREATE TABLE Enquiries (
     enquiry_date DATE DEFAULT (CURRENT_DATE),
     status ENUM('open', 'in_progress', 'closed', 'rejected') DEFAULT 'open',
     notes TEXT,
+    CONSTRAINT uq_client_property UNIQUE (client_id, property_id),
     CONSTRAINT fk_enquiries_client FOREIGN KEY (client_id) 
         REFERENCES Clients(client_id) 
         ON DELETE RESTRICT 

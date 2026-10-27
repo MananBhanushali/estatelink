@@ -14,6 +14,7 @@ export async function GET(request: NextRequest) {
     const tenantType = searchParams.get("tenant_type");
     const status = searchParams.get("status");
     const brokerId = searchParams.get("broker_id");
+    const type = searchParams.get("type");
     const page = Math.max(1, parseInt(searchParams.get("page") || "1"));
     const limit = Math.min(
       50,
@@ -40,12 +41,25 @@ export async function GET(request: NextRequest) {
       conditions.push("p.bedrooms = ?");
       params.push(Number(bedrooms));
     }
-    if (status) {
+    if (status && status !== "all") {
       if (!["available", "sold", "ongoing_rental"].includes(status)) {
         return badRequest("Invalid status filter");
       }
       conditions.push("p.status = ?");
       params.push(status);
+    }
+    if (type) {
+      if (type === "rental") {
+        conditions.push(
+          "(EXISTS (SELECT 1 FROM Leases l WHERE l.property_id = p.property_id) OR p.status = 'ongoing_rental')"
+        );
+      } else if (type === "sale") {
+        conditions.push(
+          "(NOT EXISTS (SELECT 1 FROM Leases l WHERE l.property_id = p.property_id) AND p.status != 'ongoing_rental')"
+        );
+      } else {
+        return badRequest("Invalid type filter (must be 'rental' or 'sale')");
+      }
     }
     if (brokerId) {
       conditions.push("p.broker_id = ?");

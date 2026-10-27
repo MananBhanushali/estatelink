@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { toast } from "sonner";
 import {
   Card,
   CardContent,
@@ -22,6 +23,7 @@ import {
   Wallet,
   CheckCircle,
   Clock,
+  Loader2,
 } from "lucide-react";
 
 interface StatCardProps {
@@ -78,6 +80,9 @@ interface EnquiryRow {
   property_location: string;
   property_value: string;
   property_status: string;
+  property_sqft?: number | null;
+  property_bedrooms?: number | null;
+  property_owner_name?: string | null;
   broker_name: string;
   enquiry_date: string;
   status: string;
@@ -97,6 +102,45 @@ export default function BrokerDashboardPage() {
   const [enquiries, setEnquiries] = useState<EnquiryRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [updatingId, setUpdatingId] = useState<number | null>(null);
+
+  const handleMoveToInProgress = async (enquiryId: number) => {
+    setUpdatingId(enquiryId);
+    try {
+      const res = await fetch(`/api/enquiries/${enquiryId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "in_progress" }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Failed to update enquiry status");
+      }
+
+      setEnquiries((prev) =>
+        prev.map((e) =>
+          e.enquiry_id === enquiryId ? { ...e, status: "in_progress" } : e
+        )
+      );
+      setStats((prev) =>
+        prev
+          ? {
+              ...prev,
+              open: Math.max(0, prev.open - 1),
+              in_progress: prev.in_progress + 1,
+            }
+          : null
+      );
+      toast.success("Enquiry moved to In Progress");
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : "Failed to update enquiry status"
+      );
+    } finally {
+      setUpdatingId(null);
+    }
+  };
 
   useEffect(() => {
     async function loadData() {
@@ -196,8 +240,6 @@ export default function BrokerDashboardPage() {
         <StatCard
           title="Open"
           value={stats.open}
-          change="+5 this week"
-          changeType="positive"
           icon={Clock}
           description="Needs your attention"
         />
@@ -271,11 +313,37 @@ export default function BrokerDashboardPage() {
                         {e.status.charAt(0).toUpperCase() + e.status.slice(1)}
                       </Badge>
                     </div>
-                    <p className="text-xs text-muted-foreground">
-                      {new Date(e.enquiry_date).toLocaleDateString()} · ₹{Number(
-                        e.property_value
-                      ).toLocaleString()}
-                    </p>
+                    <div className="flex flex-row items-center justify-between">
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(e.enquiry_date).toLocaleDateString()} · ₹{Number(
+                          e.property_value
+                        ).toLocaleString()}
+                      </p>
+                      <div className="flex items-center gap-2">
+                        {e.status === "open" && (
+                          <button
+                            type="button"
+                            disabled={updatingId === e.enquiry_id}
+                            onClick={() => handleMoveToInProgress(e.enquiry_id)}
+                            className="px-2.5 py-1 text-xs border rounded hover:bg-primary hover:text-primary-foreground transition-colors inline-flex items-center gap-1 disabled:opacity-50"
+                            title="Move to In Progress"
+                          >
+                            {updatingId === e.enquiry_id ? (
+                              <Loader2 className="size-3 animate-spin" />
+                            ) : null}
+                            Move to In Progress
+                          </button>
+                        )}
+                        {e.status === "in_progress" && (
+                          <Link
+                            href={`/broker/enquiries/${e.enquiry_id}/convert`}
+                            className="px-2.5 py-1 text-xs border rounded hover:bg-primary hover:text-primary-foreground transition-colors font-medium inline-flex items-center"
+                          >
+                            Convert
+                          </Link>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -288,8 +356,8 @@ export default function BrokerDashboardPage() {
           <CardHeader>
             <CardTitle className="text-sm font-semibold">Quick Actions</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
-            <Link href="/broker/properties/new">
+          <CardContent className="flex flex-col gap-3">
+            <Link href="/broker/properties/new" className="w-full">
               <Button
                 className="w-full flex items-center gap-2"
                 variant="default"
@@ -297,7 +365,7 @@ export default function BrokerDashboardPage() {
                 <PlusCircle className="size-4" /> List New Property
               </Button>
             </Link>
-            <Link href="/broker/enquiries">
+            <Link href="/broker/enquiries" className="w-full">
               <Button
                 className="w-full flex items-center gap-2"
                 variant="outline"
@@ -305,7 +373,7 @@ export default function BrokerDashboardPage() {
                 <ClipboardList className="size-4" /> Manage Enquiries
               </Button>
             </Link>
-            <Link href="/broker/earnings">
+            <Link href="/broker/earnings" className="w-full">
               <Button
                 className="w-full flex items-center gap-2"
                 variant="outline"
@@ -313,7 +381,7 @@ export default function BrokerDashboardPage() {
                 <Wallet className="size-4" /> View Earnings
               </Button>
             </Link>
-            <Link href="/broker/reviews">
+            <Link href="/broker/reviews" className="w-full">
               <Button
                 className="w-full flex items-center gap-2"
                 variant="outline"

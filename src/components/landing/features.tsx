@@ -60,7 +60,7 @@ const FEATURES: Feature[] = [
 
 export function Features() {
   return (
-    <section className="py-20 px-4">
+    <section id="features" className="py-20 px-4">
       <ScrollReveal className="mb-12 transition-delay-100">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
@@ -105,11 +105,11 @@ export function Features() {
       <ScrollReveal className="mt-16 flex justify-center transition-delay-500">
         <Button
           size="lg"
-          className="brand-gradient-bg text-white shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40"
+          className="h-12 px-9 rounded-full brand-gradient-bg text-white font-semibold text-base shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 group"
           nativeButton={false}
           render={<Link href="/register" />}
         >
-          Start Managing Your Brokerage
+          <span>Start Managing Your Brokerage</span>
         </Button>
       </ScrollReveal>
     </section>

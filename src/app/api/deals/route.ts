@@ -7,7 +7,13 @@ import { RowDataPacket } from "mysql2";
 export async function GET(request: NextRequest) {
   const user = await getAuthUser();
   if (!user) return unauthorized();
-  if (user.role !== "broker" && user.role !== "admin") return forbidden();
+  if (
+    user.role !== "broker" &&
+    user.role !== "admin" &&
+    user.role !== "client"
+  ) {
+    return forbidden();
+  }
 
   try {
     const { searchParams } = new URL(request.url);
@@ -18,7 +24,11 @@ export async function GET(request: NextRequest) {
     const conditions: string[] = [];
     const params: (string | number)[] = [];
 
-    if (user.role === "broker") {
+    if (user.role === "client") {
+      if (!user.refId) return badRequest("Client profile not linked");
+      conditions.push("d.client_id = ?");
+      params.push(user.refId);
+    } else if (user.role === "broker") {
       conditions.push("d.broker_id = ?");
       params.push(user.refId!);
     } else if (brokerId) {
@@ -42,6 +52,42 @@ export async function GET(request: NextRequest) {
     }
 
     const where = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
+
+    // Keep deal statuses current: finalize rental deals whose tenure has expired
+    // (ongoing -> ended) and reactivate their properties. Mirrors
+    // sp_refresh_expired_rentals() so the broker earnings page and other
+    // dashboards always reflect a closed deal as "ended" rather than stale
+    // "ongoing", without requiring a manual admin refresh.
+    await pool.query(
+      `UPDATE Properties
+       SET status = 'available'
+       WHERE property_id IN (
+         SELECT property_id FROM Deals
+         WHERE deal_status = 'ongoing'
+           AND rental_end_date IS NOT NULL
+           AND rental_end_date < CURRENT_DATE
+       )`
+    );
+    await pool.query(
+      `UPDATE Deals
+       SET deal_status = 'ended'
+       WHERE deal_status = 'ongoing'
+         AND rental_end_date IS NOT NULL
+         AND rental_end_date < CURRENT_DATE`
+    );
+
+    // Heal any completed (sale) deals whose property status was not correctly
+    // set to 'sold' at deal creation time (e.g. legacy records).
+    await pool.query(
+      `UPDATE Properties
+       SET status = 'sold'
+       WHERE status = 'available'
+         AND property_id IN (
+           SELECT property_id FROM Deals
+           WHERE deal_type = 'sale'
+             AND deal_status = 'completed'
+         )`
+    );
 
     const [rows] = await pool.query<RowDataPacket[]>(
       `SELECT d.deal_id, d.enquiry_id, d.property_id, d.broker_id, d.client_id,

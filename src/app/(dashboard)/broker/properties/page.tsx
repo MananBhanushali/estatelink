@@ -166,23 +166,11 @@ export default function BrokerPropertiesPage() {
                   <TableCell>
                     <div className="flex gap-2">
                       <Link
-                        href={`/broker/properties/${p.property_id}`}
+                        href={`/properties/${p.property_id}`}
                         className="px-3 py-1.5 text-xs border rounded hover:bg-muted transition-colors"
                       >
                         View
                       </Link>
-                      {p.status === "available" && (
-                        <Link
-                          href={`/api/properties/${p.property_id}`}
-                          className="px-3 py-1.5 text-xs border rounded hover:bg-primary hover:text-primary-foreground transition-colors"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            // Placeholder for edit
-                          }}
-                        >
-                          Edit
-                        </Link>
-                      )}
                     </div>
                   </TableCell>
                 </TableRow>

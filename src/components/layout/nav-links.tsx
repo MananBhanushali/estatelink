@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Building2,
+  CheckCircle2,
   ClipboardList,
   LayoutDashboard,
   PlusCircle,
@@ -28,6 +29,7 @@ export function navLinksFor(role: Role): NavLink[] {
     case "client":
       return [
         { href: "/properties", label: "Browse Properties", icon: Building2 },
+        { href: "/client/deals", label: "My Deals", icon: CheckCircle2 },
         { href: "/client/enquiries", label: "My Enquiries", icon: ClipboardList },
       ];
     case "broker":

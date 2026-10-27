@@ -17,6 +17,7 @@ export interface PropertyCardProps {
   broker_name?: string | null;
   tenant_types?: string[];
   enquiry_count?: number;
+  is_rental?: boolean;
 }
 
 export function PropertyCard({
@@ -30,15 +31,16 @@ export function PropertyCard({
   broker_name,
   tenant_types = [],
   enquiry_count = 0,
+  is_rental,
 }: PropertyCardProps) {
   const price = Number(value);
-  const isRental = price < 100000; // heuristics: rentals are monthly, typically < ₹1 lakh
+  const isRental = is_rental !== undefined ? is_rental : price < 1000000;
   const priceLabel = isRental
     ? `₹${price.toLocaleString()}/mo`
     : `₹${(price / 1e7).toLocaleString(undefined, { maximumFractionDigits: 2 })}Cr`;
 
   return (
-    <Card className="hover:shadow-md transition-shadow border-border overflow-hidden">
+    <Card className="hover:shadow-md transition-shadow border-border overflow-hidden flex flex-col h-full">
       <div className="relative h-48 overflow-hidden bg-muted">
         <div className="h-full w-full bg-gradient-to-br from-blue-900/50 to-emerald-900/50 flex items-center justify-center">
           <svg
@@ -56,8 +58,11 @@ export function PropertyCard({
           </svg>
         </div>
         <StatusBadge status={status} className="absolute top-3 left-3 z-10" />
+        <span className="absolute top-3 right-3 z-10 rounded-full bg-background/85 px-2 py-0.5 text-[0.65rem] font-semibold backdrop-blur-xs text-foreground shadow-xs border border-border/50">
+          {isRental ? "Rental" : "Sale"}
+        </span>
       </div>
-      <CardContent className="p-3">
+      <CardContent className="p-3 flex-1 flex flex-col">
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
             <Link
@@ -108,7 +113,7 @@ export function PropertyCard({
           )}
         </div>
       </CardContent>
-      <CardFooter className="p-3">
+      <CardFooter className="p-3 mt-auto">
         <Link
           href={`/properties/${property_id}`}
           className="flex w-full items-center justify-between rounded-md border border-transparent px-3 py-2 text-sm font-medium transition-colors hover:bg-muted"

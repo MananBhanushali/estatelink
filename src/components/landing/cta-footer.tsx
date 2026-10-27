@@ -20,16 +20,15 @@ export function CTAFooter() {
           <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row sm:justify-center">
             <Button
               size="lg"
-              className="bg-white text-blue-900 shadow-lg shadow-black/20 hover:shadow-black/30 transition-all"
+              className="w-full sm:w-auto h-12 px-8 rounded-full bg-white text-blue-900 font-semibold text-base shadow-lg shadow-black/20 hover:shadow-black/30 hover:bg-white/95 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
               nativeButton={false}
               render={<Link href="/register" />}
             >
-              Get Started — It&rsquo;s Free
+              Sign Up — It&rsquo;s Free
             </Button>
             <Button
               size="lg"
-              variant="outline"
-              className="border-white/30 text-white hover:bg-white/10"
+              className="w-full sm:w-auto h-12 px-8 rounded-full border-2 border-white/60 !bg-transparent !text-white font-semibold text-base hover:!bg-white/20 hover:!text-white hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
               nativeButton={false}
               render={<Link href="/properties" />}
             >

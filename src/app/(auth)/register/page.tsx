@@ -50,15 +50,10 @@ export default function RegisterPage() {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setName("");
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setEmail("");
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPhone("");
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPassword("");
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setRole("client");
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setClientType("bachelor");
   }, [pathname]);
 
@@ -84,6 +79,7 @@ export default function RegisterPage() {
       });
       toast.success(`Account created — welcome, ${user.name}`);
       router.replace(roleHome(user.role));
+      router.refresh();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Registration failed");
     } finally {

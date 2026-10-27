@@ -5,6 +5,11 @@ import { PropertyDetail, PropertyDetailSkeleton } from "@/components/properties/
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
+import { ArrowLeft } from "lucide-react";
+
+// Allow blocking prerender so params can be awaited outside Suspense
+export const instant = false;
+
 // This route fetches live (uncached) database data via a connection, which
 // cannot be cached with `"use cache"` and `dynamic` is disabled by
 // `nextConfig.cacheComponents`. Wrapping the data access in <Suspense> with a
@@ -35,14 +40,17 @@ export default async function PropertyDetailPage({
 
   return (
     <div className="flex flex-col gap-6">
+      <div>
+        <Link href="/properties">
+          <Button variant="outline" className="gap-2">
+            <ArrowLeft className="size-4" />
+            Back to listings
+          </Button>
+        </Link>
+      </div>
       <Suspense fallback={<PropertyDetailSkeleton />}>
         <PropertyDetail id={propertyId} />
       </Suspense>
-      <div className="mt-4 flex gap-3">
-        <Link href="/properties" className="flex-1">
-          <Button variant="outline">← Back to listings</Button>
-        </Link>
-      </div>
     </div>
   );
 }

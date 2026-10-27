@@ -89,11 +89,21 @@ export function AuthProvider({
   }, []);
 
   useEffect(() => {
-    // Revalidate only when the server couldn't hydrate (e.g. cookie set
-    // client-side after SSR).
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    if (initialUser === undefined) refresh();
+    if (initialUser === undefined) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      refresh();
+    }
   }, [refresh, initialUser]);
+
+  useEffect(() => {
+    function handleStorage(e: StorageEvent) {
+      if (e.key === "estatelink_auth_sync") {
+        refresh();
+      }
+    }
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
+  }, [refresh]);
 
   const login = useCallback(async (email: string, password: string) => {
     const res = await fetch("/api/auth/login", {
@@ -103,6 +113,11 @@ export function AuthProvider({
     });
     const authed = await readUser(res);
     setUser(authed);
+    try {
+      localStorage.setItem("estatelink_auth_sync", Date.now().toString());
+    } catch {
+      // Ignore if localStorage is disabled
+    }
     return authed;
   }, []);
 
@@ -114,12 +129,22 @@ export function AuthProvider({
     });
     const authed = await readUser(res);
     setUser(authed);
+    try {
+      localStorage.setItem("estatelink_auth_sync", Date.now().toString());
+    } catch {
+      // Ignore if localStorage is disabled
+    }
     return authed;
   }, []);
 
   const logout = useCallback(async () => {
     await fetch("/api/auth/logout", { method: "POST" });
     setUser(null);
+    try {
+      localStorage.setItem("estatelink_auth_sync", Date.now().toString());
+    } catch {
+      // Ignore if localStorage is disabled
+    }
   }, []);
 
   const value = useMemo(

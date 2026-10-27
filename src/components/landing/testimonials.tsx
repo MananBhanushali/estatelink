@@ -37,7 +37,7 @@ const TESTIMONIALS: Testimonial[] = [
 
 export function Testimonials() {
   return (
-    <section className="py-20 px-4">
+    <section id="testimonials" className="py-20 px-4">
       <ScrollReveal className="mb-12 transition-delay-100">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">

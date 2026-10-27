@@ -34,16 +34,34 @@ export async function GET(request: NextRequest) {
 
     const where = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
 
+    // Heal any completed (sale) deals whose property status was not correctly
+    // set to 'sold' at deal creation time (e.g. legacy records).
+    await pool.query(
+      `UPDATE Properties
+       SET status = 'sold'
+       WHERE status = 'available'
+         AND property_id IN (
+           SELECT property_id FROM Deals
+           WHERE deal_type = 'sale'
+             AND deal_status = 'completed'
+         )`
+    );
+
     const [rows] = await pool.query<RowDataPacket[]>(
       `SELECT e.enquiry_id, e.client_id, e.property_id, e.broker_id,
               e.enquiry_date, e.status, e.notes,
               c.name AS client_name, c.email AS client_email,
               p.location AS property_location, p.value AS property_value, p.status AS property_status,
-              b.name AS broker_name
+              p.square_feet AS property_sqft, p.bedrooms AS property_bedrooms, p.owner_name AS property_owner_name,
+              b.name AS broker_name,
+              comm.owner_brokerage_percent, comm.client_brokerage_percent,
+              (EXISTS (SELECT 1 FROM Leases l WHERE l.property_id = p.property_id) OR p.status = 'ongoing_rental') AS is_rental
        FROM Enquiries e
        JOIN Clients c ON e.client_id = c.client_id
        JOIN Properties p ON e.property_id = p.property_id
        JOIN Brokers b ON e.broker_id = b.broker_id
+       LEFT JOIN Commission comm ON p.commission_id = comm.commission_id
+       LEFT JOIN Leases l ON p.property_id = l.property_id
        ${where}
        ORDER BY e.enquiry_id DESC`,
       params
@@ -89,6 +107,18 @@ export async function POST(request: NextRequest) {
     }
 
     const brokerId = props[0].broker_id as number;
+
+    // Check for an existing enquiry from this client for this property
+    const [existing] = await pool.query<RowDataPacket[]>(
+      "SELECT enquiry_id FROM Enquiries WHERE client_id = ? AND property_id = ?",
+      [user.refId, property_id]
+    );
+    if (existing.length > 0) {
+      return NextResponse.json(
+        { error: "You have already submitted an enquiry for this property" },
+        { status: 409 }
+      );
+    }
 
     const [result] = await pool.query<ResultSetHeader>(
       `INSERT INTO Enquiries (client_id, property_id, broker_id, notes)

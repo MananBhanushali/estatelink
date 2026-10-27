@@ -24,7 +24,8 @@ import {
 import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ClipboardList, Clock } from "lucide-react";
+import { ClipboardList, Clock, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 interface EnquiryRow {
   enquiry_id: number;
@@ -62,6 +63,36 @@ export default function AdminEnquiriesPage() {
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("");
+  const [updatingId, setUpdatingId] = useState<number | null>(null);
+
+  const handleMoveToInProgress = async (enquiryId: number) => {
+    setUpdatingId(enquiryId);
+    try {
+      const res = await fetch(`/api/enquiries/${enquiryId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "in_progress" }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Failed to update enquiry status");
+      }
+
+      setEnquiries((prev) =>
+        prev.map((e) =>
+          e.enquiry_id === enquiryId ? { ...e, status: "in_progress" } : e
+        )
+      );
+      toast.success("Enquiry moved to In Progress");
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : "Failed to update enquiry status"
+      );
+    } finally {
+      setUpdatingId(null);
+    }
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -221,13 +252,31 @@ export default function AdminEnquiriesPage() {
                         {e.notes || "—"}
                       </TableCell>
                       <TableCell>
-                        <Link
-                          href={`/broker/enquiries/${e.enquiry_id}/convert`}
-                          className="px-3 py-1.5 text-xs border rounded hover:bg-primary hover:text-primary-foreground transition-colors"
-                          title="Convert to deal"
-                        >
-                          Convert
-                        </Link>
+                        <div className="flex items-center gap-2">
+                          {e.status === "open" && (
+                            <button
+                              type="button"
+                              disabled={updatingId === e.enquiry_id}
+                              onClick={() => handleMoveToInProgress(e.enquiry_id)}
+                              className="px-2.5 py-1 text-xs border rounded hover:bg-primary hover:text-primary-foreground transition-colors inline-flex items-center gap-1 disabled:opacity-50"
+                              title="Move to In Progress"
+                            >
+                              {updatingId === e.enquiry_id ? (
+                                <Loader2 className="size-3 animate-spin" />
+                              ) : null}
+                              Move to In Progress
+                            </button>
+                          )}
+                          {e.status === "in_progress" && (
+                            <Link
+                              href={`/broker/enquiries/${e.enquiry_id}/convert`}
+                              className="px-2.5 py-1 text-xs border rounded hover:bg-primary hover:text-primary-foreground transition-colors font-medium inline-flex items-center"
+                              title="Convert to deal"
+                            >
+                              Convert
+                            </Link>
+                          )}
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}

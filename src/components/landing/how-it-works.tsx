@@ -1,107 +1,107 @@
 "use client";
 
 import Link from "next/link";
-import { Search, MessageCircle, Handshake } from "lucide-react";
+import { Search, MessageSquare, Handshake, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollReveal } from "@/components/shared/scroll-animation";
 
-interface StepItemProps {
-  Icon: React.ElementType;
-  title: string;
-  desc: string;
-  index: number;
-  style?: React.CSSProperties;
-}
-
-function StepItem({ Icon, title, desc, index, style }: StepItemProps) {
-  const isEven = index % 2 === 0;
-  return (
-    <ScrollReveal
-      className={`
-        relative z-10 mb-12 px-4 md:mb-0 md:flex md:items-center
-        md:justify-between md:pr-12 last:mb-0
-        opacity-0 translate-y-6 animate-fade-in
-        transition-all duration-700 ease-out
-      `}
-      style={style}
-    >
-      <div className="flex items-center justify-center size-10 rounded-full border border-border bg-card mb-6 md:mb-0 md:absolute md:left-1/2 md:-translate-x-1/2">
-        <span className="text-sm font-bold text-foreground">{index + 1}</span>
-      </div>
-      <div
-        className={`
-          md:w-full md:max-w-md p-6 rounded-xl border border-border bg-card
-          ${isEven ? "md:ml-auto md:text-left" : "md:mr-auto md:text-right"}
-        `}
-      >
-        <div
-          className={`flex items-center justify-center gap-2 mb-4 ${isEven ? "md:justify-start" : "md:justify-end"}`}
-        >
-          <Icon className="size-5 text-blue-400 dark:text-blue-300" />
-        </div>
-        <h3 className="text-lg font-semibold text-foreground mb-2">{title}</h3>
-        <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
-      </div>
-    </ScrollReveal>
-  );
-}
-
-const STEPS: Array<{
-  Icon: React.ElementType;
-  title: string;
-  desc: string;
-}> = [
+const STEPS = [
   {
+    step: "01",
     Icon: Search,
     title: "Browse Properties",
-    desc: "Search listings by location, budget, bedrooms, and tenant type.",
+    desc: "Search verified listings by location, budget, bedrooms, and tenant eligibility with instant filters.",
+    badge: "Instant Search",
   },
   {
-    Icon: MessageCircle,
+    step: "02",
+    Icon: MessageSquare,
     title: "Submit Enquiry",
-    desc: "Send an enquiry on any property — the broker is notified instantly.",
+    desc: "Send an enquiry directly to the property's assigned broker — notifications are dispatched instantly.",
+    badge: "Direct Contact",
   },
   {
+    step: "03",
     Icon: Handshake,
     title: "Close the Deal",
-    desc: "Convert the enquiry into a deal with automatic commission calculation.",
+    desc: "Convert qualified enquiries into finalized deals with automated brokerage and company commission splits.",
+    badge: "Auto Commission",
   },
 ];
 
 export function HowItWorks() {
   return (
-    <section className="py-20 px-4">
-      <ScrollReveal className="mb-12 transition-delay-100">
+    <section id="how-it-works" className="py-24 px-4 relative overflow-hidden">
+      {/* Background radial glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -z-10 w-[800px] h-[350px] bg-gradient-to-r from-blue-500/10 via-emerald-500/10 to-transparent blur-[120px] pointer-events-none" />
+
+      <ScrollReveal className="mb-16 transition-delay-100">
         <div className="mx-auto max-w-2xl text-center">
+          <div className="inline-flex items-center gap-1.5 rounded-full border border-border/80 bg-card/80 px-3.5 py-1 text-xs font-medium text-muted-foreground mb-4">
+            Simple 3-Step Workflow
+          </div>
           <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
             How <span className="brand-gradient-text">It Works</span>
           </h2>
-          <p className="mt-4 text-muted-foreground max-w-lg mx-auto">
-            From browsing to closing in three simple steps.
+          <p className="mt-4 text-muted-foreground max-w-lg mx-auto text-base">
+            From discovering the perfect property to closing and commission disbursement.
           </p>
         </div>
       </ScrollReveal>
 
-      <div className="relative mx-auto max-w-2xl">
-        <div className="absolute left-1/2 top-12 bottom-12 w-[2px] bg-border" />
-        {STEPS.map((step, i) => (
-          <StepItem
-            key={step.title}
-            {...step}
-            index={i}
-            style={{ animationDelay: `${i * 150}ms` }}
-          />
-        ))}
+      <div className="mx-auto max-w-6xl">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {STEPS.map((step, i) => {
+            const StepIcon = step.Icon;
+            return (
+              <ScrollReveal
+                key={step.title}
+                className="relative rounded-2xl border border-border/80 bg-card/70 backdrop-blur-sm p-8 shadow-sm hover:shadow-xl hover:shadow-blue-500/10 hover:border-primary/40 hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between group"
+                style={{ animationDelay: `${i * 150}ms` }}
+              >
+                <div>
+                  {/* Top Bar with Icon and Step Number Badge */}
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="size-12 rounded-xl bg-blue-500/10 dark:bg-blue-500/20 text-blue-500 dark:text-blue-400 flex items-center justify-center group-hover:scale-110 group-hover:bg-blue-500/20 transition-all">
+                      <StepIcon className="size-6" />
+                    </div>
+                    <span className="flex items-center justify-center size-9 rounded-full brand-gradient-bg text-white font-bold text-sm shadow-md shadow-blue-500/20">
+                      {step.step}
+                    </span>
+                  </div>
+
+                  <span className="inline-block text-xs font-semibold text-primary uppercase tracking-wider mb-2">
+                    {step.badge}
+                  </span>
+
+                  <h3 className="text-xl font-bold text-foreground mb-3 group-hover:text-primary transition-colors">
+                    {step.title}
+                  </h3>
+
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {step.desc}
+                  </p>
+                </div>
+
+                <div className="mt-8 pt-4 border-t border-border/40 flex items-center justify-between text-xs text-muted-foreground">
+                  <span>Step {i + 1} of 3</span>
+                  <ArrowRight className="size-3.5 group-hover:translate-x-1 group-hover:text-primary transition-all" />
+                </div>
+              </ScrollReveal>
+            );
+          })}
+        </div>
       </div>
 
       <ScrollReveal className="mt-16 flex justify-center transition-delay-500">
         <Button
           size="lg"
-          className="brand-gradient-bg text-white shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40"
+          className="h-12 px-9 rounded-full brand-gradient-bg text-white font-semibold text-base shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 group"
           nativeButton={false}
           render={<Link href="/register" />}
         >
-          Get Started Today
+          <span>Get Started Today</span>
+          <ArrowRight className="size-4 ml-1.5 group-hover:translate-x-1 transition-transform" />
         </Button>
       </ScrollReveal>
     </section>
