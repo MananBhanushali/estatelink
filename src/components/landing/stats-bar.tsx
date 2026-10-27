@@ -14,15 +14,15 @@ interface StatItemProps {
 
 function StatItem({ Icon, color, value, label, style }: StatItemProps) {
   return (
-    <div className="p-6 rounded-xl border border-white/10 bg-white/5 flex flex-col items-center gap-3" style={style}>
-      <div className="size-10 rounded-lg flex items-center justify-center bg-blue-500/10">
+    <div className="p-6 rounded-xl border border-border bg-card flex flex-col items-center gap-3" style={style}>
+      <div className="size-10 rounded-lg flex items-center justify-center dark:bg-blue-600/20 bg-blue-500/10">
         <Icon className={`size-5 ${color}`} />
       </div>
       <div className="text-center">
-        <span className="text-3xl font-bold text-white tracking-tight">
+        <span className="text-3xl font-bold text-foreground tracking-tight">
           {value}
         </span>
-        <p className="text-xs text-slate-400 uppercase tracking-wider">
+        <p className="text-xs text-muted-foreground uppercase tracking-wider">
           {label}
         </p>
       </div>
@@ -70,7 +70,7 @@ export function StatsBar() {
   }, []);
 
   return (
-    <section className="border-y border-white/10 bg-white/5 backdrop-blur">
+    <section className="border-y border-border bg-background/80 backdrop-blur">
       <ScrollReveal className="relative z-10 transition-delay-100">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 px-4 py-10">
           {STATS.map((stat, i) => (

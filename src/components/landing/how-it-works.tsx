@@ -25,22 +25,22 @@ function StepItem({ Icon, title, desc, index, style }: StepItemProps) {
       `}
       style={style}
     >
-      <div className="flex items-center justify-center size-10 rounded-full border border-white/20 bg-white/5 mb-6 md:mb-0 md:absolute md:left-1/2 md:-translate-x-1/2">
-        <span className="text-sm font-bold text-white">{index + 1}</span>
+      <div className="flex items-center justify-center size-10 rounded-full border border-border bg-card mb-6 md:mb-0 md:absolute md:left-1/2 md:-translate-x-1/2">
+        <span className="text-sm font-bold text-foreground">{index + 1}</span>
       </div>
       <div
         className={`
-          md:w-full md:max-w-md p-6 rounded-xl border border-white/10 bg-white/5
+          md:w-full md:max-w-md p-6 rounded-xl border border-border bg-card
           ${isEven ? "md:ml-auto md:text-left" : "md:mr-auto md:text-right"}
         `}
       >
         <div
           className={`flex items-center justify-center gap-2 mb-4 ${isEven ? "md:justify-start" : "md:justify-end"}`}
         >
-          <Icon className="size-5 text-blue-400" />
+          <Icon className="size-5 text-blue-400 dark:text-blue-300" />
         </div>
-        <h3 className="text-lg font-semibold text-white mb-2">{title}</h3>
-        <p className="text-sm text-slate-400 leading-relaxed">{desc}</p>
+        <h3 className="text-lg font-semibold text-foreground mb-2">{title}</h3>
+        <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
       </div>
     </ScrollReveal>
   );
@@ -73,17 +73,17 @@ export function HowItWorks() {
     <section className="py-20 px-4">
       <ScrollReveal className="mb-12 transition-delay-100">
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
+          <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
             How <span className="brand-gradient-text">It Works</span>
           </h2>
-          <p className="mt-4 text-slate-400 max-w-lg mx-auto">
+          <p className="mt-4 text-muted-foreground max-w-lg mx-auto">
             From browsing to closing in three simple steps.
           </p>
         </div>
       </ScrollReveal>
 
       <div className="relative mx-auto max-w-2xl">
-        <div className="absolute left-1/2 top-12 bottom-12 w-[2px] bg-white/10" />
+        <div className="absolute left-1/2 top-12 bottom-12 w-[2px] bg-border" />
         {STEPS.map((step, i) => (
           <StepItem
             key={step.title}

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { Hero } from "@/components/landing/hero";
 import { StatsBar } from "@/components/landing/stats-bar";
 import { Features } from "@/components/landing/features";
@@ -16,7 +17,10 @@ export const metadata: Metadata = {
 
 export default function Home() {
   return (
-    <div className="min-h-svh bg-background text-foreground">
+    <div className="min-h-svh bg-background text-foreground relative">
+      <div className="fixed top-6 right-6 z-50">
+        <ThemeToggle />
+      </div>
       <Hero />
       <StatsBar />
       <Features />

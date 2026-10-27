@@ -7,13 +7,13 @@ import { ScrollReveal } from "@/components/shared/scroll-animation";
 
 export function CTAFooter() {
   return (
-    <section className="py-20 px-4 border-y border-white/10 bg-blue-900/10">
+    <section className="py-20 px-4 border-y border-border dark:bg-blue-900/10 bg-blue-50/40">
       <ScrollReveal className="relative z-10 mx-auto max-w-3xl text-center transition-delay-100">
-        <div className="rounded-2xl border border-white/20 bg-gradient-to-br from-blue-600 via-blue-700 to-emerald-600 p-8 md:p-12">
+        <div className="rounded-2xl border border-white/30 bg-gradient-to-br from-blue-600 via-blue-700 to-emerald-600 p-8 md:p-12">
           <h2 className="text-3xl font-bold text-white sm:text-4xl">
             Ready to modernize your brokerage?
           </h2>
-          <p className="mt-4 text-slate-200 max-w-lg mx-auto">
+          <p className="mt-4 text-white/90 max-w-lg mx-auto">
             Join 50+ brokers already using EstateLink to manage listings,
             enquiries, deals, and commissions.
           </p>
@@ -41,34 +41,34 @@ export function CTAFooter() {
 
       <footer className="mt-16 px-4">
         <ScrollReveal className="relative z-10 transition-delay-300">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4 px-6 py-6 border-t border-white/10">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 px-6 py-6 border-t border-border">
             <div className="flex items-center gap-2">
               <div className="flex size-7 items-center justify-center rounded-lg brand-gradient-bg">
                 <Building2 className="size-4" />
               </div>
-              <span className="text-sm font-bold text-white tracking-tight">
+              <span className="text-sm font-bold text-foreground tracking-tight">
                 Estate<span className="brand-gradient-text">Link</span>
               </span>
             </div>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-muted-foreground">
               EstateLink · DBMS Course Project · Built with Next.js 15 & MySQL
             </p>
             <div className="flex items-center gap-6">
               <a
                 href="/login"
-                className="text-xs text-slate-400 hover:text-white transition-colors"
+                className="text-xs text-muted-foreground hover:text-foreground transition-colors"
               >
                 Sign in
               </a>
               <a
                 href="/register"
-                className="text-xs text-slate-400 hover:text-white transition-colors"
+                className="text-xs text-muted-foreground hover:text-foreground transition-colors"
               >
                 Register
               </a>
               <Link
                 href="/properties"
-                className="text-xs text-slate-400 hover:text-white transition-colors"
+                className="text-xs text-muted-foreground hover:text-foreground transition-colors"
               >
                 Properties
               </Link>

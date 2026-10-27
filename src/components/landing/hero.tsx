@@ -19,16 +19,16 @@ interface StatItemProps {
 
 function StatItem({ Icon, color, label, desc, style }: StatItemProps) {
   return (
-    <div className="p-6 rounded-xl border border-white/5 bg-white/5 opacity-0 translate-y-6 animate-fade-in transition-all duration-700 ease-out" style={style}>
+    <div className="p-6 rounded-xl border border-border bg-card opacity-0 translate-y-6 animate-fade-in transition-all duration-700 ease-out" style={style}>
       <div className="flex items-center gap-2 mb-3">
         <div className="size-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
           <Icon className={`size-5 ${color}`} />
         </div>
-        <span className="text-sm font-medium text-blue-200 uppercase tracking-wider">
+        <span className="text-sm font-medium text-primary uppercase tracking-wider">
           {label}
         </span>
       </div>
-      <p className="text-sm text-slate-400 leading-relaxed">{desc}</p>
+      <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
     </div>
   );
 }
@@ -62,23 +62,23 @@ const ICONS: Array<{
 export function Hero() {
   return (
     <section className="relative flex min-h-[70vh] flex-col items-center justify-center overflow-hidden px-4 py-12 text-center">
-      <div className="absolute inset-0 -z-10 bg-gradient-to-br from-blue-900/20 via-slate-900 to-emerald-900/20" />
-      <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-blue-600/20 rounded-full blur-[100px] animate-float" />
+      <div className="absolute inset-0 -z-10 dark:bg-gradient-to-br dark:from-blue-900/20 dark:via-slate-900 dark:to-emerald-900/20 from-blue-50/30 via-white to-emerald-50/30" />
+      <div className="absolute top-1/4 left-1/4 w-72 h-72 dark:bg-blue-600/30 bg-blue-100/50 rounded-full blur-[100px] animate-float" />
       <div
-        className="absolute bottom-1/4 right-1/4 w-72 h-72 bg-emerald-500/20 rounded-full blur-[100px] animate-float"
+        className="absolute bottom-1/4 right-1/4 w-72 h-72 dark:bg-emerald-500/30 bg-emerald-100/50 rounded-full blur-[100px] animate-float"
         style={{ animationDelay: "-2s" }}
       />
 
       <ScrollReveal className="relative z-10 mx-auto max-w-4xl transition-delay-100">
-        <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs font-medium text-blue-200">
+        <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-xs font-medium text-primary">
           <Building2 className="size-4" />
           Property Brokerage Platform
         </div>
-        <h1 className="mt-6 text-5xl font-bold tracking-tight text-white sm:text-6xl">
+        <h1 className="mt-6 text-5xl font-bold tracking-tight text-foreground sm:text-6xl">
           Brokerage,{" "}
           <span className="brand-gradient-text">Simplified.</span>
         </h1>
-        <p className="mt-4 text-lg text-slate-300 max-w-2xl mx-auto sm:text-xl">
+        <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto sm:text-xl">
           Manage listings, enquiries, deals, commissions, and rental lifecycles
           — all in one brokerage management platform built for modern
           brokerages.
