@@ -14,6 +14,7 @@ DROP VIEW IF EXISTS Broker_Leaderboard_View;
 DROP VIEW IF EXISTS Deal_Earnings_View;
 DROP VIEW IF EXISTS Available_Properties_View;
 
+DROP TRIGGER IF EXISTS trg_auto_set_property_status_on_deal;
 DROP PROCEDURE IF EXISTS sp_refresh_expired_rentals;
 
 DROP TABLE IF EXISTS Reviews;
@@ -368,6 +369,51 @@ BEGIN
     UPDATE Deals
     SET deal_status = 'ended'
     WHERE deal_status = 'ongoing' AND rental_end_date < CURRENT_DATE;
+END //
+
+DELIMITER ;
+
+-- ============================================================================
+-- Trigger: Auto-Sync Property Status on Deal Insert
+-- ============================================================================
+-- PURPOSE:
+--   Whenever a new row is inserted into the Deals table, this AFTER INSERT
+--   trigger automatically updates the corresponding property's status:
+--     • deal_type = 'sale'   → Properties.status = 'sold'
+--     • deal_type = 'rental' → Properties.status = 'ongoing_rental'
+--
+-- WHY AFTER INSERT (not BEFORE INSERT):
+--   The trigger fires AFTER the Deals row is successfully committed, so the
+--   property update is guaranteed to happen only when the deal actually exists.
+--   Using BEFORE INSERT would risk updating the property even if the deal
+--   INSERT later failed a constraint check.
+--
+-- WHY THIS IS BETTER THAN APPLICATION-LAYER UPDATES:
+--   Without this trigger the API route had to run separate UPDATE queries
+--   (plus "heal" queries for legacy records) every time deals were fetched.
+--   The trigger enforces consistency at the database level — regardless of
+--   which application, script, or direct SQL session inserts the deal row.
+-- ============================================================================
+DELIMITER //
+
+CREATE TRIGGER trg_auto_set_property_status_on_deal
+AFTER INSERT ON Deals
+FOR EACH ROW
+BEGIN
+    -- [TRIGGER BODY]: Branch on the deal type of the newly inserted row.
+    -- NEW.deal_type — refers to the value in the row just inserted.
+    -- NEW.property_id — the property that must be updated.
+    IF NEW.deal_type = 'sale' THEN
+        -- Mark property as permanently sold.
+        UPDATE Properties
+        SET status = 'sold'
+        WHERE property_id = NEW.property_id;
+    ELSEIF NEW.deal_type = 'rental' THEN
+        -- Mark property as occupied under an active rental.
+        UPDATE Properties
+        SET status = 'ongoing_rental'
+        WHERE property_id = NEW.property_id;
+    END IF;
 END //
 
 DELIMITER ;
